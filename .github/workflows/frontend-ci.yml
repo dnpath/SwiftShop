@@ -1,0 +1,33 @@
+name: Frontend QA Sandbox CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Testing Dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            npm init -y
+            npm install -D vitest jsdom
+          fi
+
+      - name: Execute Automated Vitest Suite
+        run: npx vitest run
