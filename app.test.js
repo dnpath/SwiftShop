@@ -4,26 +4,40 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
-// Read the index.html file directly into memory using the current working directory path
-const html = fs.readFileSync(path.resolve(process.cwd(), './Index.html'), 'utf8');
+const getHtmlPath = () => {
+    const localPath = path.resolve(__dirname, './index.html');
+    if (fs.existsSync(localPath)) return localPath;
+    
+    const rootPath = path.resolve(process.cwd(), './index.html');
+    if (fs.existsSync(rootPath)) return rootPath;
+    
+    return '/home/runner/work/SwiftShop/SwiftShop/index.html';
+};
+
+const html = fs.readFileSync(getHtmlPath(), 'utf8');
 
 describe('SwiftShop QA Sandbox Unit Tests', () => {
     let window;
 
     beforeEach(() => {
-        // Clear window.localStorage context before every single run
-        window.localStorage.clear();
-
-        // Inject the exact HTML structure into JSDOM environment
+        // 1. Inject HTML layout first to initialize the DOM elements
         document.documentElement.innerHTML = html.toString();
         
-        // Mock global window objects & trigger the standard load script
-        window = global.window;
-        vi.useFakeTimers(); // Intercept JavaScript setTimeouts
+        // 2. Point to the verified JSDOM global window structure
+        window = globalThis.window || global.window;
+
+        // 3. Clean up storage through the global environment context safely
+        if (typeof localStorage !== 'undefined') {
+            localStorage.clear();
+        } else if (window && window.localStorage) {
+            window.localStorage.clear();
+        }
         
-        // Manually fire the onload event initialized in your app
-        if (window.onload) window.onload();
+        vi.useFakeTimers(); 
+        
+        if (window && window.onload) window.onload();
     });
+
 
     test('Initial view defaults strictly to login page', () => {
         const loginView = document.getElementById('login-view');
