@@ -20,24 +20,32 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     let window;
 
     beforeEach(() => {
-        // 1. Inject HTML layout first to initialize the DOM elements
+        // 1. Inject the HTML into the virtual DOM
         document.documentElement.innerHTML = html.toString();
         
-        // 2. Point to the verified JSDOM global window structure
+        // 2. Capture the JSDOM window context
         window = globalThis.window || global.window;
 
-        // 3. Clean up storage through the global environment context safely
+        // 3. Clear local storage safely
         if (typeof localStorage !== 'undefined') {
             localStorage.clear();
         } else if (window && window.localStorage) {
             window.localStorage.clear();
         }
         
-        vi.useFakeTimers(); 
+        vi.useFakeTimers();
+
+        // 4. FIX: Find the script tag inside your HTML and execute it manually in JSDOM
+        const scriptEl = document.querySelector('script');
+        if (scriptEl) {
+            const newScript = document.createElement('script');
+            newScript.textContent = scriptEl.textContent;
+            document.body.appendChild(newScript); // This forces JSDOM to execute the code
+        }
         
+        // 5. Fire the load event to initialize app state
         if (window && window.onload) window.onload();
     });
-
 
     test('Initial view defaults strictly to login page', () => {
         const loginView = document.getElementById('login-view');
@@ -50,7 +58,7 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     test('Authenticating state reveals main application dashboards', () => {
         const loginForm = document.getElementById('login-form');
         
-        // Simulate a submit event profile
+        // Trigger a submit event
         loginForm.dispatchEvent(new window.Event('submit'));
 
         const navPanel = document.getElementById('nav');
@@ -61,10 +69,10 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     });
 
     test('Adding item increments global cart counter badges', () => {
-        // Authenticate first
+        // Authenticate first to render the shop view
         document.getElementById('login-form').dispatchEvent(new window.Event('submit'));
 
-        // Target the first "Add to Cart" button discovered in the rendered grid
+        // Click the first Add to Cart button
         const addCartBtn = document.querySelector('.btn-add-cart');
         addCartBtn.click();
 
@@ -75,18 +83,16 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     test('Simulating API delay renders loading indicator, then resolves', () => {
         document.getElementById('login-form').dispatchEvent(new window.Event('submit'));
 
-        // Trigger the 3-second delay method
+        // Trigger the latency helper directly
         window.loadAsyncCatalogWithDelay(3000);
 
-        // Assert spinner element exists immediately
         let spinner = document.getElementById('loading-spinner');
         expect(spinner).not.toBeNull();
         expect(spinner.textContent).toContain('Querying structural catalog endpoints');
 
-        // Fast-forward time inside the fake clock framework by 3 seconds
+        // Fast-forward fake timers by 3 seconds
         vi.advanceTimersByTime(3000);
 
-        // Assert loader is cleanly unmounted and replaced with the active product cards
         spinner = document.getElementById('loading-spinner');
         expect(spinner).toBeNull();
         expect(document.querySelectorAll('.product-card').length).toBeGreaterThan(0);
@@ -95,7 +101,7 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     test('Flash sale drops introduce a distinct, interactive product entry', () => {
         document.getElementById('login-form').dispatchEvent(new window.Event('submit'));
 
-        // Fire the runtime injector function
+        // Fire the dynamic injector
         window.injectDynamicPromoItem();
 
         const cards = document.querySelectorAll('.product-card');
