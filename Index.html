@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftShop - QA Test Environment</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text-main); padding-bottom: 60px; }
+        .hidden { display: none !important; }
+        
+        /* HEADER & NAVIGATION */
+        header { background: #ffffff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .nav-menu { display: flex; align-items: center; gap: 20px; list-style: none; }
+        .nav-link { color: var(--text-muted); font-weight: 500; cursor: pointer; text-decoration: none; font-size: 15px; background: none; border: none; }
+        .nav-link:hover, .nav-link.active { color: var(--primary); }
+        
+        /* QA CONTROL OVERLAY PANEL */
+        .qa-panel { background: #0f172a; color: #f1f5f9; padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 13px; }
+        .qa-btn { background: #334155; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; font-size: 12px; cursor: pointer; }
+        .qa-btn:hover { background: #475569; }
+
+        /* MAIN BODY CONTAINER */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .view-title { margin-bottom: 24px; font-size: 24px; font-weight: 700; }
+
+        /* LOGIN SCREEN DESIGN */
+        .login-card { max-width: 400px; margin: 60px auto; background: var(--card); padding: 32px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; color: #334155; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; }
+        .form-group input:focus { border-color: var(--primary); outline: none; }
+        .btn-block { width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; text-align: center; }
+
+        /* PRODUCT CATALOG TILES GRID */
+        .shop-layout { display: grid; grid-template-columns: 240px 1fr; gap: 30px; }
+        .filter-sidebar { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 8px; height: fit-content; }
+        .filter-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px; }
+        .filter-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .filter-item { padding: 8px 12px; border-radius: 6px; font-size: 14px; cursor: pointer; color: #475569; }
+        .filter-item:hover, .filter-item.active { background: #eff6ff; color: var(--primary); font-weight: 600; }
+        
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 180px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #94a3b8; font-weight: bold; }
+        .product-info { padding: 16px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+        .product-name { font-size: 16px; font-weight: 600; line-height: 1.4; }
+        .product-meta { display: flex; justify-content: space-between; align-items: center; }
+        .product-price { font-size: 18px; font-weight: 700; color: var(--text-main); }
+        
+        /* TABLES (CART & ORDERS) */
+        .data-table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        .data-table th { background: #f8fafc; padding: 14px 16px; text-align: left; font-size: 13px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+        .data-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 15px; vertical-align: middle; }
+        
+        /* CHECKOUT SUMMARY BLOCK */
+        .cart-layout { display: grid; grid-template-columns: 1fr 360px; gap: 30px; align-items: start; }
+        .summary-card { background: var(--card); border: 1px solid var(--border); padding: 24px; border-radius: 8px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+        
+        /* BADGES */
+        .badge { padding: 4px 8px; border-radius: 9999px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-confirmed { background: #dcfce7; color: #15803d; }
+        .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+        
+        /* BUTTON VARIATIONS */
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.15s; font-size: 14px; text-align: center; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div id="qa-tools" class="qa-panel hidden">
+        <strong>QA Injectors:</strong>
+        <button onclick="injectDynamicPromoItem()" class="qa-btn" id="btn-inject-item">⚡ Flash Sale Drop</button>
+        <button onclick="triggerDynamicPriceFluctuation()" class="qa-btn" id="btn-trigger-price">📈 Swing Market Prices</button>
+        <button onclick="loadAsyncCatalogWithDelay(3000)" class="qa-btn" id="btn-trigger-lag">⏳ Simulate API Latency (3s)</button>
+    </div>
+    <div class="header-container">
+        <div class="logo" onclick="switchView('shop-view')" id="site-logo">🛍️ SwiftShop</div>
+        <ul id="nav" class="nav-menu hidden">
+            <li><button onclick="switchView('shop-view')" id="nav-shop" class="nav-link active">Shop</button></li>
+            <li><button onclick="switchView('orders-view')" id="nav-orders" class="nav-link">My Orders</button></li>
+            <li><button onclick="switchView('cart-view')" id="nav-cart" class="nav-link" style="position:relative;">Cart 🛒 <span id="cart-count" style="background:var(--danger); color:white; font-size:11px; padding:2px 6px; border-radius:10px; font-weight:700;">0</span></button></li>
+            <li><button onclick="logout()" class="nav-link" id="nav-logout" style="color:var(--danger)">Logout</button></li>
+        </ul>
+    </div>
+</header>
+
+<div class="container">
+    
+    <!-- LOGIN VIEW -->
+    <div id="login-view">
+        <div class="login-card">
+            <h3 style="font-size:22px; margin-bottom:8px;">Welcome Back</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">QA Sandbox Mode: Type any credential set to test authorization handling loops.</p>
+            <form id="login-form" onsubmit="login(event)">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required value="">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required value="">
+                </div>
+                <button type="submit" id="login-submit" class="btn btn-primary btn-block">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN SHOP CATALOG VIEW -->
+    <div id="shop-view" class="shop-layout hidden">
+        <aside class="filter-sidebar">
+            <h4 class="filter-title">Categories</h4>
+            <ul class="filter-list">
+                <li class="filter-item active" onclick="filterCategory('All')">All Categories</li>
+                <li class="filter-item" onclick="filterCategory('Hardware')">Hardware</li>
+                <li class="filter-item" onclick="filterCategory('Licensing')">Licensing</li>
+                <li class="filter-item" onclick="filterCategory('Provisions')">Provisions</li>
+            </ul>
+        </aside>
+        <main>
+            <h3 class="view-title">Featured Products</h3>
+            <div class="products-grid" id="product-grid-body"></div>
+        </main>
+    </div>
+
+    <!-- SHOPPING CART VIEW -->
+    <div id="cart-view" class="hidden">
+        <h3 class="view-title">Your Shopping Cart</h3>
+        <div class="cart-layout">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product Details</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Line Item Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-table-body"></tbody>
+            </table>
+            
+            <div class="summary-card" id="cart-summary-block">
+                <h4 style="margin-bottom:16px; font-size:16px;">Order Summary</h4>
+                <div class="summary-row">
+                    <span style="color:var(--text-muted)">Subtotal</span>
+                    <span id="summary-subtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span style="color:var(--text-muted)">Estimated Shipping</span>
+                    <span style="color:var(--success); font-weight:600;">FREE</span>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border); margin:16px 0;">
+                <div class="summary-row" style="font-size:18px; font-weight:800;">
+                    <span>Total Amount</span>
+                    <span id="summary-total">$0.00</span>
+                </div>
+                <button onclick="placeOrder()" id="btn-checkout" class="btn btn-primary btn-block" style="margin-top:20px;">Proceed to Secure Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER TRACKING VIEW -->
+    <div id="orders-view" class="hidden">
+        <h3 class="view-title">Order Processing Engine</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tracking ID</th>
+                    <th>Date/Time</th>
+                    <th>Fulfillment Details</th>
+                    <th>Total Captured</th>
+                    <th>Status</th>
+                    <th>System Operations</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+// --- APP SEED PRODUCT MANIFEST ---
+    const PRODUCTS = [
+        { id: "PROD-001", name: "Premium Test Widget V2", price: 25.00, category: "Hardware", emoji: "⚙️" },
+        { id: "PROD-002", name: "Automated Script Enterprise Token", price: 99.99, category: "Licensing", emoji: "🔑" },
+        { id: "PROD-003", name: "Flaky Test Repellent Spray", price: 10.50, category: "Provisions", emoji: "🛡️" },
+        { id: "PROD-004", name: "Artisanal Dev Dark Roast Coffee", price: 4.50, category: "Provisions", emoji: "☕" }
+    ];
+
+    let currentCategoryFilter = 'All';
+    let isCatalogLoading = false; // New boolean state flag to fix the deadlock bug properly
+
+    let state = {
+        isLoggedIn: false,
+        cart: [],
+        orders: []
+    };
+
+    function loadState() {
+        const saved = localStorage.getItem('qa_shop_state_v2');
+        if (saved) { state = JSON.parse(saved); }
+        render();
+        if (state.isLoggedIn) { switchView('shop-view'); }
+    }
+
+    function saveState() {
+        localStorage.setItem('qa_shop_state_v2', JSON.stringify(state));
+        render();
+    }
+
+    function login(e) {
+        e.preventDefault();
+        state.isLoggedIn = true;
+        saveState();
+        switchView('shop-view');
+    }
+
+    function logout() {
+        state.isLoggedIn = false;
+        state.cart = [];
+        isCatalogLoading = false; // reset flag
+        saveState();
+        switchView('login-view');
+    }
+
+    function addToCart(productId) {
+        const product = PRODUCTS.find(p => p.id === productId);
+        const existing = state.cart.find(item => item.id === productId);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            state.cart.push({ ...product, quantity: 1 });
+        }
+        saveState();
+    }
+
+    function placeOrder() {
+        if (state.cart.length === 0) return;
+        const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const newOrder = {
+            id: 'SWIFT-' + Math.floor(100000 + Math.random() * 900000),
+            timestamp: new Date().toLocaleString(),
+            items: state.cart.map(i => `${i.name} (x${i.quantity})`).join(', '),
+            total: total.toFixed(2),
+            status: 'Pending'
+        };
+
+        state.orders.unshift(newOrder);
+        state.cart = [];
+        saveState();
+        switchView('orders-view');
+        
+        const trackingId = newOrder.id;
+        setTimeout(() => {
+            const currentSaved = JSON.parse(localStorage.getItem('qa_shop_state_v2'));
+            if (currentSaved) {
+                const target = currentSaved.orders.find(o => o.id === trackingId);
+                if (target && target.status === 'Pending') {
+                    target.status = 'Confirmed';
+                    localStorage.setItem('qa_shop_state_v2', JSON.stringify(currentSaved));
+                    loadState();
+                }
+            }
+        }, 5000);
+    }
+
+    function cancelOrder(orderId) {
+        const order = state.orders.find(o => o.id === orderId);
+        if (order) {
+            order.status = 'Cancelled';
+            saveState();
+        }
+    }
+
+    // --- FIXED QA INJECTOR OPERATIONS ---
+    function injectDynamicPromoItem() {
+        // If it was artificially loading, snap out of it so user can see injection
+        isCatalogLoading = false; 
+        
+        const randomId = 'PROD-DYN-' + Math.floor(1000 + Math.random() * 9000);
+        const dynamicOptions = [
+            { name: "✨ Quantum Memory Leak Patch", price: 149.99, category: "Licensing", emoji: "🔮" },
+            { name: "💥 Hardware Bug-Smasher Mallet", price: 19.95, category: "Hardware", emoji: "🔨" }
+        ];
+        const selected = dynamicOptions[Math.floor(Math.random() * dynamicOptions.length)];
+        PRODUCTS.push({ id: randomId, ...selected });
+        render();
+    }
+
+    function triggerDynamicPriceFluctuation() {
+        if (PRODUCTS.length === 0) return;
+        const index = Math.floor(Math.random() * PRODUCTS.length);
+        PRODUCTS[index].price = parseFloat((PRODUCTS[index].price * (Math.random() > 0.5 ? 1.20 : 0.80)).toFixed(2));
+        render();
+    }
+
+    function loadAsyncCatalogWithDelay(delayMs = 3000) {
+        isCatalogLoading = true;
+        render(); // render will now display the loading spinner safely based on boolean state
+
+        setTimeout(() => {
+            isCatalogLoading = false;
+            render(); // clears spinner and renders catalog items automatically
+        }, delayMs);
+    }
+
+    function filterCategory(categoryName) {
+        currentCategoryFilter = categoryName;
+        // Update selection states across sidebar buttons
+        const items = document.querySelectorAll('.filter-item');
+        items.forEach(el => {
+            if (el.textContent.includes(categoryName)) el.classList.add('active');
+            else el.classList.remove('active');
+        });
+        render();
+    }
+
+    function switchView(viewId) {
+        if (!state.isLoggedIn) viewId = 'login-view';
+        ['login-view', 'shop-view', 'cart-view', 'orders-view'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+        
+        // Track current nav link highlighting state 
+        const navMap = { 'shop-view': 'nav-shop', 'cart-view': 'nav-cart', 'orders-view': 'nav-orders' };
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        if (navMap[viewId]) document.getElementById(navMap[viewId]).classList.add('active');
+    }
+
+    // --- DOM TRANSFORMATION CORE ---
+    function render() {
+        if (state.isLoggedIn) {
+            document.getElementById('nav').classList.remove('hidden');
+            document.getElementById('qa-tools').classList.remove('hidden');
+        } else {
+            document.getElementById('nav').classList.add('hidden');
+            document.getElementById('qa-tools').classList.add('hidden');
+        }
+
+        const totalItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('cart-count').innerText = totalItems;
+
+        // Draw Product UI Grid
+        const gridBody = document.getElementById('product-grid-body');
+        
+        if (isCatalogLoading) {
+            gridBody.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; font-weight:600; color:var(--primary);" id="loading-spinner">🔄 Querying structural catalog endpoints...</div>`;
+        } else {
+            const visibleProducts = PRODUCTS.filter(p => currentCategoryFilter === 'All' || p.category === currentCategoryFilter);
+            gridBody.innerHTML = visibleProducts.map(p => `
+                <div class="product-card" data-id="${p.id}" data-category="${p.category}">
+                    <div class="product-img">${p.emoji}</div>
+                    <div class="product-info">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-meta">
+                            <span class="product-price">$${p.price.toFixed(2)}</span>
+                            <button onclick="addToCart('${p.id}')" class="btn btn-primary btn-add-cart" style="padding:6px 12px; font-size:13px;">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Draw Cart Rows
+        const cartBody = document.getElementById('cart-table-body');
+        if (state.cart.length === 0) {
+            cartBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">Your shopping cart is bare! Add items inside the shop view.</td></tr>`;
+            document.getElementById('cart-summary-block').classList.add('hidden');
+        } else {
+            document.getElementById('cart-summary-block').classList.remove('hidden');
+            let accumulatedTotal = 0;
+            cartBody.innerHTML = state.cart.map(item => {
+                const sub = item.price * item.quantity;
+                accumulatedTotal += sub;
+                return `
+                    <tr class="cart-item-row">
+                        <td style="font-weight:600;">${item.name} <span style="font-size:11px; color:var(--text-muted); block; font-weight:normal;">(${item.category})</span></td>
+                        <td>$${item.price.toFixed(2)}</td>
+                        <td>${item.quantity}</td>
+                        <td style="font-weight:700;">$${sub.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+            document.getElementById('summary-subtotal').innerText = `$${accumulatedTotal.toFixed(2)}`;
+            document.getElementById('summary-total').innerText = `$${accumulatedTotal.toFixed(2)}`;
+        }
+
+        // Draw Order Invoices
+        const ordersBody = document.getElementById('orders-table-body');
+        if (state.orders.length === 0) {
+            ordersBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:30px;">No historical orders discovered in this test lifecycle.</td></tr>`;
+        } else {
+            ordersBody.innerHTML = state.orders.map(o => `
+                <tr class="order-row" id="invoice-${o.id}">
+                    <td><code>${o.id}</code></td>
+                    <td style="font-size:13px; color:var(--text-muted);">${o.timestamp}</td>
+                    <td style="max-width:300px; font-size:14px;">${o.items}</td>
+                    <td style="font-weight:700;">$${o.total}</td>
+                    <td><span class="badge badge-${o.status.toLowerCase()}">${o.status}</span></td>
+                    <td>
+                        ${o.status === 'Pending' ? `<button onclick="cancelOrder('${o.id}')" class="btn btn-danger btn-cancel-order" style="padding:4px 8px; font-size:12px;">Void Order</button>` : '—'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    window.onload = loadState;
+</script>
+</body>
+</html>
