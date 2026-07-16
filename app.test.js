@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
@@ -9,8 +11,8 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     let window;
 
     beforeEach(() => {
-        // Clear localStorage context before every single run
-        localStorage.clear();
+        // Clear window.localStorage context before every single run
+        window.localStorage.clear();
 
         // Inject the exact HTML structure into JSDOM environment
         document.documentElement.innerHTML = html.toString();
