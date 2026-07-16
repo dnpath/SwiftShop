@@ -17,34 +17,36 @@ const getHtmlPath = () => {
 const html = fs.readFileSync(getHtmlPath(), 'utf8');
 
 describe('SwiftShop QA Sandbox Unit Tests', () => {
-    let window;
+    let windowContext;
 
     beforeEach(() => {
         // 1. Inject the HTML into the virtual DOM
         document.documentElement.innerHTML = html.toString();
         
-        // 2. Capture the JSDOM window context
-        window = globalThis.window || global.window;
+        // 2. Capture the JSDOM window context securely
+        windowContext = globalThis.window || global.window;
 
         // 3. Clear local storage safely
         if (typeof localStorage !== 'undefined') {
             localStorage.clear();
-        } else if (window && window.localStorage) {
-            window.localStorage.clear();
+        } else if (windowContext && windowContext.localStorage) {
+            windowContext.localStorage.clear();
         }
         
         vi.useFakeTimers();
 
-        // 4. FIX: Find the script tag inside your HTML and execute it manually in JSDOM
+        // 4. Extract and evaluate the scripts directly in the global scope 
+        // to guarantee functions append cleanly to global execution contexts
         const scriptEl = document.querySelector('script');
         if (scriptEl) {
-            const newScript = document.createElement('script');
-            newScript.textContent = scriptEl.textContent;
-            document.body.appendChild(newScript); // This forces JSDOM to execute the code
+            const scriptContent = scriptEl.textContent;
+            // Using Function() executes the code in global scope, attaching functions to window
+            const runInGlobalScope = new Function(scriptContent);
+            runInGlobalScope.call(windowContext);
         }
         
         // 5. Fire the load event to initialize app state
-        if (window && window.onload) window.onload();
+        if (windowContext && windowContext.onload) windowContext.onload();
     });
 
     test('Initial view defaults strictly to login page', () => {
@@ -56,9 +58,11 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     });
 
     test('Authenticating state reveals main application dashboards', () => {
-        // Create a mock event profile and invoke the login handler directly
         const mockEvent = { preventDefault: () => {} };
-        window.login(mockEvent);
+        
+        // Safely extract from whatever global reference JSDOM attached it to
+        const loginFn = windowContext.login || globalThis.login;
+        loginFn(mockEvent);
 
         const navPanel = document.getElementById('nav');
         const shopView = document.getElementById('shop-view');
@@ -68,12 +72,13 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     });
 
     test('Adding item increments global cart counter badges', () => {
-        // Authenticate first to render the layout
         const mockEvent = { preventDefault: () => {} };
-        window.login(mockEvent);
+        const loginFn = windowContext.login || globalThis.login;
+        loginFn(mockEvent);
 
-        // Directly execute the underlying cart function to bypass the JSDOM inline attribute limitation
-        window.addToCart('PROD-001');
+        // Safely extract and call the addToCart method
+        const addToCartFn = windowContext.addToCart || globalThis.addToCart;
+        addToCartFn('PROD-001');
 
         const cartCounter = document.getElementById('cart-count');
         expect(cartCounter.textContent).toBe('1');
@@ -81,10 +86,12 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
 
     test('Simulating API delay renders loading indicator, then resolves', () => {
         const mockEvent = { preventDefault: () => {} };
-        window.login(mockEvent);
+        const loginFn = windowContext.login || globalThis.login;
+        loginFn(mockEvent);
 
-        // Trigger the latency helper
-        window.loadAsyncCatalogWithDelay(3000);
+        // Safely extract and call the latency handler
+        const loadAsyncFn = windowContext.loadAsyncCatalogWithDelay || globalThis.loadAsyncCatalogWithDelay;
+        loadAsyncFn(3000);
 
         let spinner = document.getElementById('loading-spinner');
         expect(spinner).not.toBeNull();
@@ -100,10 +107,12 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
 
     test('Flash sale drops introduce a distinct, interactive product entry', () => {
         const mockEvent = { preventDefault: () => {} };
-        window.login(mockEvent);
+        const loginFn = windowContext.login || globalThis.login;
+        loginFn(mockEvent);
 
-        // Fire the dynamic injector
-        window.injectDynamicPromoItem();
+        // Safely extract and call the injector
+        const injectPromoFn = windowContext.injectDynamicPromoItem || globalThis.injectDynamicPromoItem;
+        injectPromoFn();
 
         const cards = document.querySelectorAll('.product-card');
         const targetedCard = Array.from(cards).find(card => 
