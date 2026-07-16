@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
-// Read the index.html file directly into memory to simulate the browser DOM
-const html = fs.readFileSync(path.resolve(__dirname, './index.html'), 'utf8');
+// Read the index.html file directly into memory using the current working directory path
+const html = fs.readFileSync(path.resolve(process.cwd(), './index.html'), 'utf8');
 
 describe('SwiftShop QA Sandbox Unit Tests', () => {
     let window;
