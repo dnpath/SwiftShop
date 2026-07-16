@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Read the index.html file directly into memory using the current working directory path
-const html = fs.readFileSync(path.resolve(process.cwd(), './index.html'), 'utf8');
+const html = fs.readFileSync(path.resolve(process.cwd(), './Index.html'), 'utf8');
 
 describe('SwiftShop QA Sandbox Unit Tests', () => {
     let window;
