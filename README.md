@@ -1,6 +1,6 @@
 # 🛒 SwiftShop - QA Automation Sandbox WebApp
 
-![QA CI Status](https://github.com/dnpath/SwiftShop/actions/workflows/frontend-ci.yml/badge.svg)
+![QA CI Status](https://github.com/dnpath/SwiftShop/actions/workflows/frontend-unit-tests-ci.yml/badge.svg)
 
 [🛒 SwiftShop](https://dnpath.github.io/SwiftShop)
 
