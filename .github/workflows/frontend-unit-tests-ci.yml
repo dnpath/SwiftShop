@@ -1,4 +1,4 @@
-name: Frontend QA Sandbox CI
+name: Frontend Unit Tests Run
 
 on:
   push:
