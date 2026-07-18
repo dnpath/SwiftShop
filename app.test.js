@@ -1,6 +1,14 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import {
+    render,
+    switchView,
+    addToCart,
+    state,
+    loadAsyncCatalogWithDelay
+} from "./app.js";
+
 import fs from 'fs';
 import path from 'path';
 
@@ -26,6 +34,7 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
         // 2. Capture the JSDOM window context securely
         windowContext = globalThis.window || global.window;
 
+
         // 3. Clear local storage safely
         if (typeof localStorage !== 'undefined') {
             localStorage.clear();
@@ -48,6 +57,7 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
         // 5. Fire the load event to initialize app state
         if (windowContext && windowContext.onload) windowContext.onload();
     });
+
 
     test('Initial view defaults strictly to login page', () => {
         const loginView = document.getElementById('login-view');
@@ -72,16 +82,17 @@ describe('SwiftShop QA Sandbox Unit Tests', () => {
     });
 
     test('Adding item increments global cart counter badges', () => {
-        const mockEvent = { preventDefault: () => {} };
-        const loginFn = windowContext.login || globalThis.login;
-        loginFn(mockEvent);
+        // const mockEvent = { preventDefault: () => {} };
+        // const loginFn = windowContext.login || globalThis.login;
+        // loginFn(mockEvent);
 
         // Safely extract and call the addToCart method
         const addToCartFn = windowContext.addToCart || globalThis.addToCart;
         addToCartFn('PROD-001');
+        
 
         const cartCounter = document.getElementById('cart-count');
-        expect(cartCounter.textContent).toBe('1');
+        expect(cartCounter.innerText).toBe(1);
     });
 
     test('Simulating API delay renders loading indicator, then resolves', () => {

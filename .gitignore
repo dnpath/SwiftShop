@@ -1,0 +1,54 @@
+# ====================================================================
+# Node & Dependencies
+# ====================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ====================================================================
+# Playwright Automation Artifacts
+# ====================================================================
+# Local test execution evidence (videos, screenshots, traces)
+test-results/
+
+# Playwright HTML report outputs
+playwright-report/
+blob-report/
+
+# Playwright cache and state profiles
+.playwright/
+.auth/
+
+# ====================================================================
+# Allure Reporting Metadata & Reports
+# ====================================================================
+# Raw test run results (JSON, XML files)
+allure-results/
+
+# Compiled local HTML graphical dashboard
+allure-report/
+
+# Temporary allure commandline download data
+allure-commandline/
+
+# ====================================================================
+# Environments & Security
+# ====================================================================
+.env
+.env.local
+.env.*.local
+
+# ====================================================================
+# System & Editor Files
+# ====================================================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
