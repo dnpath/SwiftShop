@@ -2,7 +2,7 @@
 
 ![QA CI Status](https://github.com/dnpath/SwiftShop/actions/workflows/frontend-unit-tests-ci.yml/badge.svg)
 
-[🛒 SwiftShop](https://dnpath.github.io/SwiftShop)
+[🛒 SwiftShop](https://dnpath.github.io/SwiftShop){:target="_blank"}
 
 A lightweight, high-fidelity e-commerce web application designed explicitly for frontend manual and automated QA testing (Selenium, Cypress, Playwright, Appium). Built entirely using vanilla HTML5, CSS Grid, and JavaScript, it runs completely **frontend-only**—making it perfect for instant deployment on **GitHub Pages** with zero backend database setup required.
 
